@@ -36,7 +36,6 @@ public interface VanityUrlAPI {
 
   void invalidateVanityUrl(Contentlet contentlet);
 
-  List<CachedVanityUrl> findInDb(Host host, Language lang);
 
   
 

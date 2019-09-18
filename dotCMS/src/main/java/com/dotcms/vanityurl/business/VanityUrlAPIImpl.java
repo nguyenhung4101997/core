@@ -115,9 +115,9 @@ public class VanityUrlAPIImpl implements VanityUrlAPI {
    *
    * @return The list of Vanity URLs.
    */
-  @Override
+
   @CloseDBIfOpened
-  public List<CachedVanityUrl> findInDb(final Host host, Language lang) {
+  private List<CachedVanityUrl> findInDb(final Host host, Language lang) {
 
     try {
       final List<Map<String, Object>> vanityUrls =
@@ -151,7 +151,6 @@ public class VanityUrlAPIImpl implements VanityUrlAPI {
       }
     }
     return cachedVanities;
-
   }
   
   

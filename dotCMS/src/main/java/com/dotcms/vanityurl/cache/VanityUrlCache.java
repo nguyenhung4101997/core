@@ -23,12 +23,6 @@ public abstract class VanityUrlCache implements Cachable {
      */
     public abstract void clearCache();
 
-    /**
-     * Removes from cache in all the registered regions a given VanityURL
-     * @param vanityURL
-     */
-    public abstract void remove(final Contentlet vanityURL);
-
 
 
     /**
@@ -55,6 +49,14 @@ public abstract class VanityUrlCache implements Cachable {
     public abstract void put404(final Host host, final Language lang, final String url);
 
     public abstract void put(Host host, Language lang, List<CachedVanityUrl> vanityURLs) ;
+
+    /**
+     * this will invalidate the vanity url live cache but will 
+     * return the old values for up to a minute or the live cache
+     * gets rebuilt, whichever comes first
+     * @param vanityURL
+     */
+    public abstract void remove(Contentlet vanityURL) ;
     
     
     

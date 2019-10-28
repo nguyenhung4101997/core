@@ -1419,6 +1419,11 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 
 	private void saveWorkflowTaskInternal(final WorkflowTask task, final WorkflowProcessor processor, final boolean doIndex) throws DotDataException {
 
+		if(UtilMethods.isSet(processor.getContentlet()) && processor.getContentlet().isCopyContentlet()){
+			Logger.debug(WorkflowAPIImpl.class, ()->"Workflow has been instructed to skip task creation due to an in progress copy operation.");
+			return;
+		}
+
 		if (doIndex) {
 			this.saveWorkflowTask(task);
 		} else {
@@ -2316,7 +2321,7 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 			if(!processor.inProcess()){
 				return;
 			}
-
+			final boolean isCopyContentletInProgress = UtilMethods.isSet(processor.getContentlet()) && processor.getContentlet().isCopyContentlet();
 			processor.getContentlet().setActionId(processor.getAction().getId());
 
 			final List<WorkflowActionClass> actionClasses = processor.getActionClasses();
@@ -2341,6 +2346,10 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 			}
 
 			if (!processor.abort()) {
+
+				if(UtilMethods.isSet(processor.getContentlet())){
+					processor.getContentlet().setProperty(Contentlet.IS_COPY_CONTENTLET, isCopyContentletInProgress);
+				}
 
 				this.saveWorkflowTask(processor);
 
@@ -2387,6 +2396,11 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 	}
 
 	private void saveWorkflowTask(final WorkflowProcessor processor) throws DotDataException {
+
+		if(UtilMethods.isSet(processor.getContentlet()) && processor.getContentlet().isCopyContentlet()){
+		   Logger.debug(WorkflowAPIImpl.class, ()->"Workflow has been instructed to skip task creation due to an in progress copy operation.");
+		   return;
+		}
 
 		WorkflowTask task = processor.getTask();
 
@@ -3030,10 +3044,11 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 		this.validateActionStepAndWorkflow(contentlet, dependencies.getModUser());
 		this.checkShorties (contentlet);
 
-		final WorkflowProcessor processor   = ThreadContextUtil.wrapReturnNoReindex(()-> this.fireWorkflowPreCheckin(contentlet, dependencies.getModUser()));
+		final WorkflowProcessor processor = ThreadContextUtil.wrapReturnNoReindex(()-> this.fireWorkflowPreCheckin(contentlet, dependencies.getModUser()));
 
 		processor.setContentletDependencies(dependencies);
 		processor.getContentlet().setProperty(Contentlet.WORKFLOW_IN_PROGRESS, Boolean.TRUE);
+		processor.getContentlet().setProperty(Contentlet.IS_COPY_CONTENTLET, contentlet.getMap().get(Contentlet.IS_COPY_CONTENTLET));
 
 		ThreadContextUtil.wrapVoidNoReindex(() -> this.fireWorkflowPostCheckin(processor));
 
@@ -3080,7 +3095,10 @@ public class WorkflowAPIImpl implements WorkflowAPI, WorkflowAPIOsgiService {
 		this.checkShorties (contentlet);
 
 		final WorkflowProcessor processor = this.fireWorkflowPreCheckin(contentlet, dependencies.getModUser(), context);
-
+		if (null != processor.getContentlet()) {
+			processor.getContentlet().setProperty(Contentlet.IS_COPY_CONTENTLET,
+					contentlet.getMap().get(Contentlet.IS_COPY_CONTENTLET));
+		}
 		processor.setContentletDependencies(dependencies);
 		this.fireWorkflowPostCheckin(processor);
 

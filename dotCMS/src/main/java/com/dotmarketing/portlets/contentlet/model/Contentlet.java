@@ -26,7 +26,6 @@ import com.dotmarketing.business.Ruleable;
 import com.dotmarketing.business.Treeable;
 import com.dotmarketing.business.UserAPI;
 import com.dotmarketing.business.Versionable;
-import com.dotmarketing.db.DbConnectionFactory;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotRuntimeException;
 import com.dotmarketing.exception.DotSecurityException;
@@ -47,9 +46,7 @@ import com.dotmarketing.util.UtilMethods;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
 import com.liferay.portal.model.User;
-
 import io.vavr.control.Try;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1738,4 +1735,16 @@ public class Contentlet implements Serializable, Permissionable, Categorizable, 
 		return null != this.getMap().get(Contentlet.WORKFLOW_IN_PROGRESS) &&
 				Boolean.TRUE.equals(this.getMap().get(Contentlet.WORKFLOW_IN_PROGRESS));
 	}
+
+    /**
+     * Determine if a copy contentlet operation is in progress
+     * @return
+     */
+    @JsonIgnore
+    public boolean isCopyContentlet () {
+
+        return null != this.getMap().get(Contentlet.IS_COPY_CONTENTLET) &&
+                Boolean.TRUE.equals(this.getMap().get(Contentlet.IS_COPY_CONTENTLET));
+    }
+
 }

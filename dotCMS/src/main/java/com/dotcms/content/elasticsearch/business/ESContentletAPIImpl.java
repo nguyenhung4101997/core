@@ -4482,13 +4482,7 @@ public class ESContentletAPIImpl implements ContentletAPI {
                     newPageVersion.setBoolProperty(DO_NOT_UPDATE_TEMPLATES, true);
                     newPageVersion.setStringProperty(HTMLPageAssetAPI.TEMPLATE_FIELD, newTemplate);
                     newPageVersion.setBoolProperty(Contentlet.DONT_VALIDATE_ME, true);
-
-                    if (contentlet.getMap().containsKey(Contentlet.DISABLE_WORKFLOW)) {
-                        newPageVersion.getMap().put(Contentlet.DISABLE_WORKFLOW, contentlet.getMap().get(Contentlet.DISABLE_WORKFLOW));
-                    }
-                    if (contentlet.getMap().containsKey(Contentlet.WORKFLOW_IN_PROGRESS)) {
-                        newPageVersion.getMap().put(Contentlet.WORKFLOW_IN_PROGRESS, contentlet.getMap().get(Contentlet.WORKFLOW_IN_PROGRESS));
-                    }
+                    newPageVersion.getMap().put(Contentlet.IS_COPY_CONTENTLET, contentlet.getMap().get(Contentlet.IS_COPY_CONTENTLET));
 
                     checkin(newPageVersion,  user, false);
                 }
@@ -6539,12 +6533,16 @@ public class ESContentletAPIImpl implements ContentletAPI {
             final List<MultiTree> pageContents = APILocator.getMultiTreeAPI().getMultiTrees(sourceContentlet.getIdentifier());
             for (final MultiTree multitree : pageContents) {
 
-                APILocator.getMultiTreeAPI().saveMultiTree(new MultiTree(copyContentlet.getIdentifier(),
+                APILocator.getMultiTreeAPI().saveMultiTree(
+                new MultiTree(
+                        copyContentlet.getIdentifier(),
                         multitree.getContainer(),
                         multitree.getContentlet(),
                         multitree.getRelationType(),
                         multitree.getTreeOrder(), 
-                        multitree.getPersonalization()));
+                        multitree.getPersonalization()
+                        )
+                );
             }
         }
 
@@ -6585,6 +6583,19 @@ public class ESContentletAPIImpl implements ContentletAPI {
         this.sendCopyEvent(copyContentlet);
 
         return copyContentlet;
+    }
+
+    /**
+     * On rare cases the copyContentlet can have an existing task already assigned
+     * In such cases we need to reset the contentlet before adding a new one.
+     * @param copyContentlet
+     * @throws DotDataException
+     */
+    private void preventTaskConflictIfAny(final Contentlet copyContentlet) throws DotDataException {
+        final WorkflowTask conflictingTask = APILocator.getWorkflowAPI().findTaskByContentlet(copyContentlet);
+        if( null != conflictingTask ){
+            APILocator.getWorkflowAPI().deleteWorkflowTask(conflictingTask, APILocator.getUserAPI().getSystemUser());
+        }
     }
 
     private String generateCopyName(final String originalName, final String copySuffix) {

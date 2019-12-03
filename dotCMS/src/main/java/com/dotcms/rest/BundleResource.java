@@ -2,7 +2,6 @@ package com.dotcms.rest;
 
 import com.dotcms.api.system.event.Payload;
 import com.dotcms.api.system.event.SystemEventType;
-import com.dotcms.api.system.event.UserSessionBean;
 import com.dotcms.api.system.event.Visibility;
 import com.dotcms.api.system.event.message.MessageSeverity;
 import com.dotcms.api.system.event.message.SystemMessageEventUtil;
@@ -16,6 +15,7 @@ import com.dotcms.rest.param.ISODateParam;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.business.DotStateException;
 import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.util.Config;
 import com.dotmarketing.util.DateUtil;
 import com.dotmarketing.util.Logger;
@@ -274,7 +274,7 @@ public class BundleResource {
 
                 this.deleteBundleByIdentifier(deleteBundlesByIdentifierForm, initData);
                 this.sendSuccessDeleteBundleMessage(deleteBundlesByIdentifierForm.getIdentifiers().size(), initData, locale);
-            } catch (DotDataException e) {
+            } catch (Exception e) {
 
                 Logger.error(this.getClass(),
                         "Exception on deleteBundlesByIdentifiers, couldn't delete the identifiers: "
@@ -327,7 +327,7 @@ public class BundleResource {
     }
 
     // one transaction for each bundle
-    private void deleteBundleByIdentifier(final DeleteBundlesByIdentifierForm deleteBundlesByIdentifierForm, final InitDataObject initData) throws DotDataException {
+    private void deleteBundleByIdentifier(final DeleteBundlesByIdentifierForm deleteBundlesByIdentifierForm, final InitDataObject initData) throws DotDataException, DotSecurityException {
 
         for (final String bundleId : deleteBundlesByIdentifierForm.getIdentifiers()) {
 
@@ -426,7 +426,7 @@ public class BundleResource {
 
                 final int bundleDeletedSize = this.bundleAPI.deleteAllBundles(initData.getUser(), statuses).size();
                 this.sendSuccessDeleteBundleMessage(bundleDeletedSize, initData, locale);
-            } catch (DotDataException e) {
+            } catch (Exception e) {
 
                 Logger.error(this.getClass(),
                         "Exception on deleteAll, couldn't delete bundles, exception message: " + e.getMessage(), e);
@@ -473,7 +473,7 @@ public class BundleResource {
                                 FAILED_TO_BUNDLE, FAILED_TO_SENT, FAILED_TO_PUBLISH});
                 final int bundleDeletedSize = this.bundleAPI.deleteAllBundles(initData.getUser(), statuses).size();
                 this.sendSuccessDeleteBundleMessage(bundleDeletedSize, initData, locale);
-            } catch (DotDataException e) {
+            } catch (Exception e) {
 
                 Logger.error(this.getClass(),
                         "Exception on deleteAllFail, couldn't delete the fail bundles, exception message: " + e.getMessage(), e);
@@ -519,7 +519,7 @@ public class BundleResource {
                         ()-> new PublishAuditStatus.Status[] {SUCCESS});
                 final int bundleDeletedSize = this.bundleAPI.deleteAllBundles(initData.getUser(), statuses).size();
                 this.sendSuccessDeleteBundleMessage(bundleDeletedSize, initData, locale);
-            } catch (DotDataException e) {
+            } catch (Exception e) {
 
                 Logger.error(this.getClass(),
                         "Exception on deleteAllSuccess, couldn't delete the success bundles, exception message: " + e.getMessage(), e);

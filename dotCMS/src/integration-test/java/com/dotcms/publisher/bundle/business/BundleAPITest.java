@@ -1,10 +1,5 @@
 package com.dotcms.publisher.bundle.business;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import com.dotcms.contenttype.exception.NotFoundInDbException;
 import com.dotcms.datagen.UserDataGen;
 import com.dotcms.publisher.bundle.bean.Bundle;
@@ -15,14 +10,18 @@ import com.dotcms.publisher.business.PublishAuditStatus.Status;
 import com.dotcms.util.IntegrationTestInitService;
 import com.dotmarketing.business.APILocator;
 import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.util.DateUtil;
 import com.dotmarketing.util.UUIDGenerator;
 import com.liferay.portal.model.User;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class BundleAPITest {
 
@@ -59,7 +58,7 @@ public class BundleAPITest {
     }
 
     @Test
-    public void test_deleteBundleAndDependencies_byAdmin() throws DotDataException {
+    public void test_deleteBundleAndDependencies_byAdmin() throws DotDataException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin = insertPublishingBundle(adminUser.getUserId(),new Date());
         final String bundleIdUser = insertPublishingBundle(newUser.getUserId(),new Date());
@@ -75,7 +74,7 @@ public class BundleAPITest {
     }
 
     @Test(expected = DotDataException.class)
-    public void test_deleteBundleAndDependencies_byLimitedUser() throws DotDataException {
+    public void test_deleteBundleAndDependencies_byLimitedUser() throws DotDataException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin = insertPublishingBundle(adminUser.getUserId(),new Date());
         final String bundleIdUser = insertPublishingBundle(newUser.getUserId(),new Date());
@@ -87,22 +86,25 @@ public class BundleAPITest {
         assertNull(bundleAPI.getBundleById(bundleIdUser));
 
         bundleAPI.deleteBundleAndDependencies(bundleIdAdmin,newUser);
-        assertNotNull(bundleAPI.getBundleById(bundleIdAdmin));
     }
 
     @Test(expected = NotFoundInDbException.class)
-    public void test_deleteBundleAndDependencies_bundleIdDoesNotExist() throws DotDataException {
+    public void test_deleteBundleAndDependencies_bundleIdDoesNotExist() throws DotDataException, DotSecurityException {
         bundleAPI.deleteBundleAndDependencies(UUIDGenerator.generateUuid(),adminUser);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_deleteBundleAndDependenciesOlderThan_futureDate() throws DotDataException {
+    public void test_deleteBundleAndDependenciesOlderThan_futureDate() throws DotDataException, DotSecurityException {
         bundleAPI.deleteBundleAndDependenciesOlderThan(DateUtil.addDate(new Date(),
                 Calendar.MONTH,1),adminUser);
     }
 
+    /**
+     * Deletes a bundles based on a date.
+     * @throws DotDataException
+     */
     @Test
-    public void test_deleteBundleAndDependenciesOlderThan_byAdmin() throws DotDataException {
+    public void test_deleteBundleAndDependenciesOlderThan_byAdmin() throws DotDataException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin = insertPublishingBundle(adminUser.getUserId(),new Date());
         final String bundleIdUser = insertPublishingBundle(newUser.getUserId(),new Date());
@@ -124,7 +126,7 @@ public class BundleAPITest {
     }
 
     @Test
-    public void test_deleteBundleAndDependenciesOlderThan_byLimitedUser() throws DotDataException {
+    public void test_deleteBundleAndDependenciesOlderThan_byLimitedUser() throws DotDataException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin = insertPublishingBundle(adminUser.getUserId(),new Date());
         final String bundleIdUser = insertPublishingBundle(newUser.getUserId(),new Date());
@@ -146,7 +148,7 @@ public class BundleAPITest {
     }
 
     @Test
-    public void test_deleteAllBundles_byAdmin() throws DotDataException, DotPublisherException {
+    public void test_deleteAllBundles_byAdmin() throws DotDataException, DotPublisherException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin_success = insertPublishingBundle(adminUser.getUserId(),new Date());
         insertPublishAuditStatus(Status.SUCCESS,bundleIdAdmin_success);
@@ -175,7 +177,7 @@ public class BundleAPITest {
     }
 
     @Test
-    public void test_deleteAllBundles_byLimitedUser() throws DotDataException, DotPublisherException {
+    public void test_deleteAllBundles_byLimitedUser() throws DotDataException, DotPublisherException, DotSecurityException {
         final User newUser = new UserDataGen().nextPersisted();
         final String bundleIdAdmin_success = insertPublishingBundle(adminUser.getUserId(),new Date());
         insertPublishAuditStatus(Status.SUCCESS,bundleIdAdmin_success);

@@ -8,6 +8,7 @@ import com.dotcms.publisher.bundle.bean.Bundle;
 import com.dotcms.publisher.business.PublishAuditStatus;
 import com.dotcms.publisher.environment.bean.Environment;
 import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.exception.DotSecurityException;
 import com.liferay.portal.model.User;
 
 public interface BundleAPI {
@@ -123,17 +124,17 @@ public interface BundleAPI {
 	 * @param user {@link com.liferay.portal.model.User} user to use to check permissions
 	 * @throws DotDataException
 	 */
-	public void deleteBundleAndDependencies(String id, User user) throws DotDataException;
+	public void deleteBundleAndDependencies(String id, User user) throws DotDataException, DotSecurityException;
 
 	/**
-	 * Deletes all sent bundles older than order than olderThan argument
+	 * Deletes all sent bundles older than "olderThan" argument
 	 *
 	 * @param olderThan {@link Date} will remove all sent bundles older than it
 	 * @param user      {@link User} User to check the deleting permissions
 	 * @return Set of bundle ids deleted
 	 * @throws	DotDataException	thrown when an error in the underlying data layer occurs
 	 */
-	Set<String> deleteBundleAndDependenciesOlderThan(Date olderThan, User user) throws DotDataException;
+	Set<String> deleteBundleAndDependenciesOlderThan(Date olderThan, User user) throws DotDataException, DotSecurityException;
 
 	/**
 	 * Deletes all bundles, if the user is admin will delete all bundles, otherwise only the bundles allowed to the user.
@@ -142,7 +143,7 @@ public interface BundleAPI {
 	 * @return Set of bundle identifiers deleted
 	 * @throws	DotDataException	thrown when an error in the underlying data layer occurs
 	 */
-	Set<String>  deleteAllBundles(User user, PublishAuditStatus.Status ...statuses) throws DotDataException;
+	Set<String>  deleteAllBundles(User user, PublishAuditStatus.Status ...statuses) throws DotDataException, DotSecurityException;
 
 	/**
 	 * updates the Bundle with the given id

@@ -67,7 +67,7 @@ public abstract class BundleFactory {
     public abstract List<Bundle> findUnsendBundles ( String userId, int limit, int offset ) throws DotDataException;
 
     /**
-     * Finds sent bundles older than "olderThan" when the owner is usedId
+     * Finds sent bundles older than "olderThan" when the owner is userId
      * @param olderThan {@link Date}    will remove the bundles older than
      * @param userId    {@link String}  will remove the bundles own by userId
      * @param limit     {@link Integer} limit for pagination

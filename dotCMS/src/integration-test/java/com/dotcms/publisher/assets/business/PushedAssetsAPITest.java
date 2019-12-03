@@ -10,14 +10,12 @@ import com.dotcms.publisher.endpoint.bean.PublishingEndPoint;
 import com.dotcms.publisher.environment.bean.Environment;
 import com.dotcms.util.IntegrationTestInitService;
 import com.dotmarketing.business.APILocator;
-import com.dotmarketing.business.FactoryLocator;
 import com.dotmarketing.exception.DotDataException;
 import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.portlets.contentlet.business.ContentletAPI;
 import com.dotmarketing.portlets.contentlet.model.Contentlet;
 import com.dotmarketing.util.UUIDGenerator;
 import com.liferay.portal.model.User;
-import io.vavr.API;
 import org.jetbrains.annotations.NotNull;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -29,9 +27,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Test the PushedAssetsAPI
@@ -144,6 +140,11 @@ public class PushedAssetsAPITest extends IntegrationTestBase {
         return pushedAssets;
     }
 
+    /**
+     * test the delete pushed asset by bundle, by pushing first some of them and them removing and checking all them are gone.
+     * @throws DotSecurityException
+     * @throws DotDataException
+     */
     @Test
     public void test_deletePushedAssetsByBundleId() throws DotSecurityException, DotDataException {
         final PushedAssetsAPI  pushedAssetsAPI = APILocator.getPushedAssetsAPI();

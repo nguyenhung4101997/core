@@ -1,38 +1,40 @@
 package com.dotcms.publisher.bundle.business;
 
+import com.dotcms.business.CloseDBIfOpened;
 import com.dotcms.business.LazyUserAPIWrapper;
+import com.dotcms.business.WrapInTransaction;
 import com.dotcms.contenttype.exception.NotFoundInDbException;
 import com.dotcms.publisher.assets.business.PushedAssetsAPI;
+import com.dotcms.publisher.bundle.bean.Bundle;
 import com.dotcms.publisher.business.DotPublisherException;
 import com.dotcms.publisher.business.PublishAuditAPI;
 import com.dotcms.publisher.business.PublishAuditStatus;
 import com.dotcms.publisher.business.PublishAuditStatus.Status;
+import com.dotcms.publisher.environment.bean.Environment;
 import com.dotcms.util.DotPreconditions;
-
+import com.dotmarketing.business.APILocator;
+import com.dotmarketing.business.FactoryLocator;
+import com.dotmarketing.business.UserAPI;
+import com.dotmarketing.exception.DotDataException;
+import com.dotmarketing.exception.DotRuntimeException;
+import com.dotmarketing.exception.DotSecurityException;
 import com.dotmarketing.util.*;
+import com.google.common.collect.ImmutableSet;
+import com.liferay.portal.model.User;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import com.dotcms.business.CloseDBIfOpened;
-import com.dotcms.business.WrapInTransaction;
-import com.dotcms.publisher.bundle.bean.Bundle;
-import com.dotcms.publisher.environment.bean.Environment;
-import com.dotmarketing.business.APILocator;
-import com.dotmarketing.business.FactoryLocator;
-import com.dotmarketing.business.UserAPI;
-import com.dotmarketing.exception.DotDataException;
-import com.dotmarketing.exception.DotRuntimeException;
-import com.google.common.collect.ImmutableSet;
-import com.liferay.portal.model.User;
-import org.apache.commons.lang3.mutable.MutableInt;
 
 public class BundleAPIImpl implements BundleAPI {
 
@@ -116,7 +118,7 @@ public class BundleAPIImpl implements BundleAPI {
 	}
 
 	@WrapInTransaction
-	private void internalDeleteBundleAndDependencies (final String bundleId, final User user) throws DotDataException { // todo: make this batcheable
+	private void internalDeleteBundleAndDependencies (final String bundleId, final User user) throws DotDataException, DotSecurityException { // todo: make this batcheable
 
 		this.validateBundleDeletePermission(user, bundleId);
 
@@ -147,7 +149,7 @@ public class BundleAPIImpl implements BundleAPI {
 
 	@WrapInTransaction
 	@Override
-	public void deleteBundleAndDependencies(final String bundleId, final User user) throws DotDataException {
+	public void deleteBundleAndDependencies(final String bundleId, final User user) throws DotDataException, DotSecurityException {
 
 		final Bundle bundle = this.getBundleById(bundleId);
 		if (null != bundle) {
@@ -172,7 +174,7 @@ public class BundleAPIImpl implements BundleAPI {
 
 	// no mark as a wrap in transaction, it is one trax per bundle to delete.
 	@Override
-	public Set<String> deleteBundleAndDependenciesOlderThan(final Date olderThan, final User user) throws DotDataException {
+	public Set<String> deleteBundleAndDependenciesOlderThan(final Date olderThan, final User user) throws DotDataException, DotSecurityException {
 
 		if(olderThan.after(new Date())){
 			Logger.error(this,"To avoid deleting bundles that publish in the future, the date can not be after the current date");
@@ -236,7 +238,7 @@ public class BundleAPIImpl implements BundleAPI {
 			if (currentCount % bundleSleepCount == 0) {
 				DateUtil.sleep(millisBundleSleep); // we decided to wait a bit in order to avoid starvation on the db connections
 			}
-		} catch (DotDataException e) {
+		} catch (DotDataException | DotSecurityException e) {
 
 			throw new DotRuntimeException(e);
 		}
@@ -245,7 +247,7 @@ public class BundleAPIImpl implements BundleAPI {
 	// no mark as a wrap in transaction, it is one trax per bundle to delete.
 	@Override
 	public Set<String> deleteAllBundles(final User user,
-										 final PublishAuditStatus.Status ...statuses) throws DotDataException {
+										 final PublishAuditStatus.Status ...statuses) throws DotDataException, DotSecurityException {
 
 		final ImmutableSet.Builder<String> bundlesDeleted = new ImmutableSet.Builder<>();
 		final boolean isAdmin         = this.userAPI.isCMSAdmin(user);

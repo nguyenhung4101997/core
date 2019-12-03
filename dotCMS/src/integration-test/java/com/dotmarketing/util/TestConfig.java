@@ -3,6 +3,9 @@ package com.dotmarketing.util;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * Test a new feature on the Config that provides not only String but also objects, in this case Enums.
+ */
 public class TestConfig {
 
     public enum TestEnum {
